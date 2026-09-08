@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>めっき検査員 技能認定テスト</title>
+
+    <meta name="theme-color" content="#1e3a8a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="めっきテスト">
+    <link rel="manifest" href="manifest.json">
+
+    <link rel="icon" type="image/png" sizes="192x192" href="https://img.icons8.com/color/192/000000/microscope.png">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/color/192/000000/microscope.png">
+
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #eff6ff;
+            --success: #10b981;
+            --success-bg: #ecfdf5;
+            --danger: #ef4444;
+            --danger-bg: #fef2f2;
+            --dark: #1f2937;
+            --gray: #f3f4f6;
+            --border: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            color: var(--dark);
+            line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .container {
+            flex: 1;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            margin-bottom: 15px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"], input[type="url"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus, input[type="url"]:focus {
+            border-color: var(--primary);
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .btn-success { background-color: var(--success); }
+        .btn-secondary { background-color: #6b7280; }
+
+        .progress-container {
+            margin-bottom: 15px;
+        }
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-bottom: 5px;
+        }
+        .progress-bar-bg {
+            background-color: var(--gray);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            background-color: var(--primary);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .category-badge {
+            display: inline-block;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .option-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-btn {
+            display: flex;
+            align-items: center;
+            background-color: white;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option-btn:active {
+            background-color: var(--gray);
+        }
+
+        .option-btn.selected {
+            border-color: var(--primary);
+            background-color: var(--primary-light);
+        }
+
+        .option-btn.correct {
+            border-color: var(--success);
+            background-color: var(--success-bg);
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        .option-btn.incorrect {
+            border-color: var(--danger);
+            background-color: var(--danger-bg);
+            color: var(--danger);
+        }
+
+        .option-badge {
+            background-color: var(--gray);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .option-btn.selected .option-badge {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .option-btn.correct .option-badge {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .option-btn.incorrect .option-badge {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .feedback-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .feedback.correct {
+            background-color: var(--success-bg);
+            border: 1px solid #a7f3d0;
+        }
+        .feedback.incorrect {
+            background-color: var(--danger-bg);
+            border: 1px solid #fca5a5;
+        }
+
+        .explanation {
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: #4b5563;
+        }
+
+        .nav-actions {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .result-screen {
+            text-align: center;
+            display: none;
+        }
+
+        .result-score {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--primary);
+            margin: 15px 0;
+        }
+
+        .judge-badge {
+            display: inline-block;
+            padding: 10px 30px;
+            border-radius: 30px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .judge-badge.pass { background-color: var(--success); }
+        .judge-badge.fail { background-color: var(--danger); }
+
+        .settings-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 15;
+        }
+
+        .settings-screen {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hidden { display: none !important; }
+        .text-center { text-align: center; }
+        .mt-4 { margin-top: 20px; }
+        .small-text { font-size: 0.8rem; color: #6b7280; line-height: 1.4; }
+    </style>
+</head>
+<body>
+
+    <header>
+        めっき検査員 技能認定テスト
+        <button class="settings-btn" id="settings-toggle-btn">⚙️</button>
+    </header>
+
+    <div class="container">
+
+        <!-- 1. 受験者ログイン画面 -->
+        <div id="login-screen" class="card">
+            <h2>🎯 受験者登録</h2>
+            <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 20px;">
+                検査員認定テストを開始します。お名前を入力してください。
+            </p>
+            <div class="input-group">
+                <label for="username">氏名</label>
+                <input type="text" id="username" placeholder="例：鈴木 太郎" autocomplete="off">
+            </div>
+
+            <button class="btn" id="start-btn">テストを開始する</button>
+
+            <div class="mt-4 text-center" id="url-status-box"></div>
+        </div>
+
+        <!-- 2. 試験中画面 -->
+        <div id="quiz-screen" class="hidden">
+            <div class="progress-container">
+                <div class="progress-text">
+                    <span id="progress-question-num">問 1 / 20</span>
+                    <span id="progress-percent">0%</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar" id="progress-bar-inner"></div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-bottom: 10px;">
+                <span class="category-badge" id="category-name">使われ方・機能</span>
+                <div class="question-text" id="question-content">問題文がここに表示されます。</div>
+                <div class="option-list" id="options-container"></div>
+            </div>
+
+            <div class="feedback" id="feedback-box">
+                <div class="feedback-title" id="feedback-title-text"></div>
+                <div class="explanation" id="explanation-text"></div>
+            </div>
+
+            <div class="nav-actions" id="nav-box">
+                <button class="btn" id="next-btn">次の問題へ ➔</button>
+            </div>
+        </div>
+
+        <!-- 3. 結果画面 -->
+        <div id="result-screen" class="card result-screen">
+            <h2>🏁 テスト結果</h2>
+            <p id="candidate-name-display" style="font-weight: bold; margin-top: 10px;"></p>
+            <div class="result-score" id="score-display">0点</div>
+            <div class="judge-badge" id="judge-display">判定</div>
+            <p style="font-size: 0.9rem; color: #4b5563; margin-bottom: 25px;" id="result-message"></p>
+
+            <button class="btn btn-success" id="finish-btn">🔄 次の受験者へ交代</button>
+        </div>
+
+        <!-- 4. 管理者設定画面 -->
+        <div id="settings-screen" class="card settings-screen">
+            <h2>⚙️ システム管理者設定</h2>
+            <p class="small-text" style="margin-bottom: 15px;">
+                送信先のGoogleスプレッドシート（GASウェブアプリ）のURLを登録してください。データは直接スプレッドシートへ安全に送信されます。
+            </p>
+            <div class="input-group">
+                <label for="gas-url">GASウェブアプリ URL</label>
+                <input type="url" id="gas-url" placeholder="https://script.google.com/macros/s/.../exec">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-secondary" id="settings-back-btn" style="flex: 1;">戻る</button>
+                <button class="btn" id="settings-save-btn" style="flex: 1;">保存する</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const QUESTIONS = [
+            {
+                "id": 1,
+                "category": "使われ方・機能",
+                "question": "コネクタ用端子への「スズ（Sn）めっき」の主な目的はどれですか？",
+                "options": {"A": "見た目を良くする", "B": "耐食性向上・電気接続確保", "C": "硬度を上げ曲げ防止", "D": "製品の重量を増す"},
+                "answer": "B",
+                "explanation": "コネクタ用端子にスズめっきを施す主な目的は、錆びを防ぐ「耐食性向上」と、電気を安定して通すための「電気接続確保」です。"
+            },
+            {
+                "id": 2,
+                "category": "使われ方・機能",
+                "question": "めっきの「耐摩耗性（擦れにくさ）」が不足すると、どうなりますか？",
+                "options": {"A": "製品が重くなる", "B": "色が徐々に濃くなる", "C": "着脱時に剥がれ不具合", "D": "寸法が急に大きくなる"},
+                "answer": "C",
+                "explanation": "耐摩耗性が不足すると、端子などの着脱の際にめっきが擦れて剥がれてしまい、接触不良などの不具合を引き起こします。"
+            },
+            {
+                "id": 3,
+                "category": "基準書に基づく検査",
+                "question": "検査基準書と作業指示書で内容が異なっていた場合、どうすべきですか？",
+                "options": {"A": "やりやすい方を選ぶ", "B": "指示書の通りに進める", "C": "作業を止め上長へ確認", "D": "勘で判断して進める"},
+                "answer": "C",
+                "explanation": "基準書と指示書に相違がある場合は、独断で判断せず、ただちに作業を止めて上長や品質管理担当者に確認を取るのが正しいルールです。"
+            },
+            {
+                "id": 4,
+                "category": "基準書に基づく検査",
+                "question": "検査をしていて「いつもと違う」「何かおかしい」と感じた場合の正しい行動は？",
+                "options": {"A": "気にせずそのまま検査", "B": "独断で合格にして出荷", "C": "中断し上長・品管へ報告", "D": "次の工程へそのまま流す"},
+                "answer": "C",
+                "explanation": "変化点や異常の予兆（いつもと違う、おかしい）を感じた場合は、速やかに作業を中断し、上長や品質管理へ報告する必要があります。"
+            },
+            {
+                "id": 5,
+                "category": "良品・不良品の違い",
+                "question": "めっきが素地に密着せず、浮き上がってしまう不良を何と呼びますか？",
+                "options": {"A": "シミ", "B": "フクレ", "C": "ヤケ", "D": "キズ"},
+                "answer": "B",
+                "explanation": "めっきが素地から剥離してドーム状に浮き上がってしまう不良を「フクレ」と呼びます。"
+            },
+            {
+                "id": 6,
+                "category": "良品・不良品の違い",
+                "question": "抜き取り検査の際、作業中の注意点として最も適切なものはどれですか？",
+                "options": {"A": "抜き取る製品だけ見ればよいので梱包に集中する", "B": "指定サンプル以外の確認は一切不要である", "C": "箱全体の製品に大きな異常（変色・異物）がないか確認する", "D": "抜き取るサンプル数を勝手に増やして全部検査する"},
+                "answer": "C",
+                "explanation": "抜き取り検査時であっても、サンプルだけでなく箱全体のロット全体に一見してわかるような異常（変色・異物混入など）がないか視野を広く持って確認することが重要です。"
+            },
+            {
+                "id": 7,
+                "category": "異常時の処置ルール",
+                "question": "検査中に連続して同じ不良が見つかった場合、最初に行うべき対応は？",
+                "options": {"A": "検査をそのまま続けて最後にまとめて報告する", "B": "不良の製品を隠しておく", "C": "ただちに停止し、該当品を隔離して上長に報告する", "D": "不良品をそのまま良品箱に混ぜる"},
+                "answer": "C",
+                "explanation": "同一不良が連続して発生する場合、ラインで異常が発生している可能性が高いため、ただちに作業（あるいは検査）を停止し、製品を隔離して上長に報告します。"
+            },
+            {
+                "id": 8,
+                "category": "異常時の処置ルール",
+                "question": "不良の疑いがある製品（不適合品）を発見した際の正しい処置はどれですか？",
+                "options": {"A": "保留・赤札をつけ隔離", "B": "そのまま次工程へ送る", "C": "デスクの中に隠す", "D": "別ロットに混ぜて出荷"},
+                "answer": "A",
+                "explanation": "不適合品やその疑いがあるものは、誤って良品と混ざらないよう、「保留」や「赤札」等の識別表示を確実に施して隔離保管します。"
+            },
+            {
+                "id": 9,
+                "category": "測定器の取り扱い",
+                "question": "膜厚計や測定器を使用する前に必ず行うべき作業はどれですか？",
+                "options": {"A": "ゼロ点調整・校正", "B": "本体の分解清掃", "C": "確認なしで即計測", "D": "ネジを限界まで締める"},
+                "answer": "A",
+                "explanation": "測定器の正確性を担保するため、測定開始前には必ず「ゼロ点調整」や「校正（キャリブレーション）」を行います。"
+            },
+            {
+                "id": 10,
+                "category": "測定器の取り扱い",
+                "question": "膜厚計で測定値が「いつもよりかなり薄い」時、最初に確認すべき点は？",
+                "options": {"A": "測定器の電源プラグが抜けていないか", "B": "焦点距離（WD）がズレていないか", "C": "室温が低すぎないか", "D": "部屋の照明の暗さ"},
+                "answer": "B",
+                "explanation": "蛍光X線膜厚計などの測定値が異常に小さくなる場合、サンプルと測定器の距離（焦点距離/WD）がズレている可能性が高いため、最初に確認します。"
+            },
+            {
+                "id": 11,
+                "category": "製品特有の知識",
+                "question": "スズ（Sn）めっきから針状の結晶が伸びてショートを起こす現象は？",
+                "options": {"A": "ピンホール", "B": "ウィスカ", "C": "バリ", "D": "クラック"},
+                "answer": "B",
+                "explanation": "スズめっき表面から時間の経過とともに単結晶の針状結晶が成長する現象を「ウィスカ（whisker）」と呼び、回路ショートの原因となります。"
+            },
+            {
+                "id": 12,
+                "category": "製品特有の知識",
+                "question": "プレス加工品の「バリ」の上にめっきがかかった場合のリスクはどれですか？",
+                "options": {"A": "めっきが薄くなりすぎる", "B": "製品が軽くなる", "C": "バリが取れて異物となりショートや不具合を起こす", "D": "めっきの色が赤くなる"},
+                "answer": "C",
+                "explanation": "バリ（金属のトゲ・突起）の上にめっきが施されると、使用中や輸送中にバリが脱落して導電性の異物となり、電気ショートなどの深刻な不具合を引き起こします。"
+            },
+            {
+                "id": 13,
+                "category": "環境負荷物質 of 知識",
+                "question": "RoHS（ローハス）指令で規制されている代表的な有害物質はどれですか？",
+                "options": {"A": "金・銀・銅", "B": "鉛・水銀・カドミウム等", "C": "鉄・アルミニウム", "D": "酸素・窒素"},
+                "answer": "B",
+                "explanation": "RoHS指令（欧州連合における電気・電子機器に対する特定有害物質の使用制限）では、鉛、水銀、カドミウム、六価クロムなどが規制されています。"
+            },
+            {
+                "id": 14,
+                "category": "環境負荷物質の知識",
+                "question": "使用する化学薬品の危険性や取扱い上の注意が書かれた文書はどれですか？",
+                "options": {"A": "SDS（安全データシート）", "B": "納品書", "C": "請求書", "D": "タイムカード"},
+                "answer": "A",
+                "explanation": "SDS（Safety Data Sheet: 安全データシート）は、化学物質やそれを含有する製剤を安全に取り扱うための情報（危険性、有害性、取扱上の注意、応急措置等）が記載された文書です。"
+            },
+            {
+                "id": 15,
+                "category": "製品図面の読み取り",
+                "question": "図面に膜厚が「5 ± 1 μm」と指定されている場合、良品となる範囲は？",
+                "options": {"A": "3 μm 〜 7 μm", "B": "4 μm 〜 6 μm", "C": "5 μm 〜 6 μm", "D": "1 μm 〜 5 μm"},
+                "answer": "B",
+                "explanation": "「5 ± 1 μm」は、基準値が5 μmで許容値（公差）がプラスマイナス1 μmであるため、4 μm（5 - 1）から6 μm（5 + 1）の範囲が合格（良品）となります。"
+            },
+            {
+                "id": 16,
+                "category": "製品図面の読み取り",
+                "question": "「めっき指定範囲」が定められている際、範囲外の注意点はどれですか？",
+                "options": {"A": "指定範囲外なら傷だらけでも問題ない", "B": "過度な付着やバリ等がなく機能に影響しないか確認する", "C": "指定範囲外は一切見なくてよい", "D": "指定範囲外を削り落とす"},
+                "answer": "B",
+                "explanation": "めっき指定範囲外であっても、過剰なめっき付着やバリなどがあり、嵌合や他部品への取り付けに支障をきたさないか、機能上問題がないか確認する必要があります。"
+            },
+            {
+                "id": 17,
+                "category": "試験設備・試験方法",
+                "question": "めっきの「錆びにくさ（耐食性）」を確かめるため塩水を噴霧する試験は？",
+                "options": {"A": "ヒートショック試験", "B": "塩水噴霧試験", "C": "引張試験", "D": "はんだ耐熱試験"},
+                "answer": "B",
+                "explanation": "塩水噴霧試験は、塩水溶液を人工的に霧状にして噴霧し、めっきなどの耐食性（防錆性能）を迅速に評価する代表的な試験方法です。"
+            },
+            {
+                "id": 18,
+                "category": "試験設備・試験方法",
+                "question": "めっきの「密着性試験（テープ剥離など）」でNGとなる状態はどれですか？",
+                "options": {"A": "テープに何もつかない", "B": "めっきがテープ側に剥がれて下地が見えてしまう", "C": "製品の表面が乾いている", "D": "めっきの色が変わらない"},
+                "answer": "B",
+                "explanation": "めっきの密着性試験（クロスカットテープ試験等）では、粘着テープを貼り付けて剥がした際、めっき層がテープ側に剥がれて下地（素地や下地めっき）が露出してしまった場合は密着不良（NG）と判定します。"
+            },
+            {
+                "id": 19,
+                "category": "管理図の知識",
+                "question": "測定データが「規格限界線（上限・下限）」を外側に飛び出した時の判断は？",
+                "options": {"A": "良品（問題なし）", "B": "規格外（不良・異常）", "C": "測定器の合格", "D": "そのまま出荷可能"},
+                "answer": "B",
+                "explanation": "管理図や製品規格において、測定値が上限値または下限値を外れることは、規格外（不良、またはプロセス異常）と判断されます。"
+            },
+            {
+                "id": 20,
+                "category": "管理図の知識",
+                "question": "管理図で測定数値が限界線を飛出（異常発生）した際の正しい対応は？",
+                "options": {"A": "数値を見なかったことにして書き直す", "B": "製品を保留にし製造・技術へ連絡し原因究明", "C": "そのまま出荷する", "D": "測定器を叩いて直す"},
+                "answer": "B",
+                "explanation": "異常が発生した場合は、速やかに該当ロット製品を保留（隔離）し、関係部署（製造、技術、品管など）に連絡してプロセス異常の原因究明を行うことが求められます。"
+            }
+        ];
+
+        let currentQuestionIdx = 0;
+        let score = 0;
+        let correctCount = 0;
+        let candidateName = "";
+        let selectedOption = null;
+        let isAnswered = false;
+        let userAnswers = {};
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js');
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadGASUrl();
+            checkUrlStatus();
+        });
+
+        function saveGASUrl(url) {
+            localStorage.setItem('plating_test_gas_url', url.trim());
+        }
+
+        function loadGASUrl() {
+            const url = localStorage.getItem('plating_test_gas_url') || "";
+            document.getElementById('gas-url').value = url;
+            return url;
+        }
+
+        function checkUrlStatus() {
+            const url = localStorage.getItem('plating_test_gas_url');
+            const box = document.getElementById('url-status-box');
+            if (url && url.startsWith('http')) {
+                box.innerHTML = '<span style="color: var(--success); font-weight: bold; font-size: 0.85rem;">🟢 Googleスプレッドシート連携 完了</span>';
+            } else {
+                box.innerHTML = '<span style="color: var(--danger); font-weight: bold; font-size: 0.85rem;">⚠️ 警告: スプレッドシート連携が未設定です。<br>右上 ⚙️ アイコンからGASのURLを設定してください。</span>';
+            }
+        }
+
+        document.getElementById('settings-toggle-btn').addEventListener('click', () => {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').style.display = 'none';
+            document.getElementById('settings-screen').style.display = 'block';
+        });
+
+        document.getElementById('settings-back-btn').addEventListener('click', () => {
+            document.getElementById('settings-screen').style.display = 'none';
+            document.getElementById('login-screen').classList.remove('hidden');
+            checkUrlStatus();
+        });
+
+        document.getElementById('settings-save-btn').addEventListener('click', () => {
+            const url = document.getElementById('gas-url').value;
+            saveGASUrl(url);
+            alert('送信先のGAS URLを保存しました！');
+            document.getElementById('settings-screen').style.display = 'none';
+            document.getElementById('login-screen').classList.remove('hidden');
+            checkUrlStatus();
+        });
+
+        document.getElementById('start-btn').addEventListener('click', () => {
+            const nameInput = document.getElementById('username').value.trim();
+            if (!nameInput) {
+                alert('受験者の氏名を入力してください。');
+                return;
+            }
+            candidateName = nameInput;
+            currentQuestionIdx = 0;
+            score = 0;
+            correctCount = 0;
+            isAnswered = false;
+            userAnswers = {};
+
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+
+            loadQuestion();
+        });
+
+        function loadQuestion() {
+            isAnswered = false;
+            selectedOption = null;
+            document.getElementById('feedback-box').style.display = 'none';
+            document.getElementById('nav-box').style.display = 'none';
+
+            const q = QUESTIONS[currentQuestionIdx];
+
+            const currentNum = currentQuestionIdx + 1;
+            const totalNum = QUESTIONS.length;
+            const percent = Math.round((currentQuestionIdx / totalNum) * 100);
+
+            document.getElementById('progress-question-num').innerText = `問 ${currentNum} / ${totalNum}`;
+            document.getElementById('progress-percent').innerText = `${percent}%`;
+            document.getElementById('progress-bar-inner').style.width = `${percent}%`;
+
+            document.getElementById('category-name').innerText = q.category;
+            document.getElementById('question-content').innerText = `問${currentNum}. ${q.question}`;
+
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+
+            for (let key in q.options) {
+                const val = q.options[key];
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<span class="option-badge">${key}</span> <span class="option-text">${val}</span>`;
+                btn.onclick = () => selectOption(key, btn);
+                container.appendChild(btn);
+            }
+        }
+
+        function selectOption(key, btnElement) {
+            if (isAnswered) return;
+
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach(b => b.classList.remove('selected'));
+
+            selectedOption = key;
+            btnElement.classList.add('selected');
+
+            judgeAnswer();
+        }
+
+        function judgeAnswer() {
+            if (isAnswered) return;
+            isAnswered = true;
+
+            const q = QUESTIONS[currentQuestionIdx];
+            const buttons = document.querySelectorAll('.option-btn');
+            const isCorrect = (selectedOption === q.answer);
+
+            buttons.forEach(btn => {
+                const key = btn.querySelector('.option-badge').innerText;
+                if (key === q.answer) {
+                    btn.classList.add('correct');
+                } else if (key === selectedOption && !isCorrect) {
+                    btn.classList.add('incorrect');
+                }
+            });
+
+            userAnswers[`問${q.id}`] = isCorrect ? '◯' : `✕ (${selectedOption})`;
+
+            const feedbackBox = document.getElementById('feedback-box');
+            const feedbackTitle = document.getElementById('feedback-title-text');
+            const explanationText = document.getElementById('explanation-text');
+
+            if (isCorrect) {
+                correctCount++;
+                feedbackBox.className = 'feedback correct';
+                feedbackTitle.innerHTML = '🟢 <b>正解！</b>';
+            } else {
+                feedbackBox.className = 'feedback incorrect';
+                feedbackTitle.innerHTML = `❌ <b>不正解...</b> (正解は [${q.answer}] です)`;
+            }
+
+            explanationText.innerText = q.explanation;
+            feedbackBox.style.display = 'block';
+            document.getElementById('nav-box').style.display = 'block';
+
+            setTimeout(() => {
+                feedbackBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }
+
+        document.getElementById('next-btn').addEventListener('click', () => {
+            currentQuestionIdx++;
+            if (currentQuestionIdx < QUESTIONS.length) {
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        });
+
+        function showResult() {
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').style.display = 'block';
+
+            score = correctCount * 5;
+            const isPass = (score >= 80);
+            const statusStr = isPass ? '合格' : '要再試験';
+
+            document.getElementById('candidate-name-display').innerText = `${candidateName} さん`;
+            document.getElementById('score-display').innerText = `${score} 点`;
+
+            const judgeDisplay = document.getElementById('judge-display');
+            const msgDisplay = document.getElementById('result-message');
+
+            if (isPass) {
+                judgeDisplay.innerText = '🎉 合 格';
+                judgeDisplay.className = 'judge-badge pass';
+                msgDisplay.innerText = 'おめでとうございます！実務に必要な技能知識を十分に満たしています。';
+            } else {
+                judgeDisplay.innerText = '⚠️ 要再試験';
+                judgeDisplay.className = 'judge-badge fail';
+                msgDisplay.innerText = '合格ラインは80点です。解説を読み返し、再度挑戦しましょう。';
+            }
+
+            sendToGoogleSheets(statusStr);
+        }
+
+        function sendToGoogleSheets(statusStr) {
+            const gasUrl = localStorage.getItem('plating_test_gas_url');
+            const finishBtn = document.getElementById('finish-btn');
+
+            if (!gasUrl || !gasUrl.startsWith('http')) {
+                finishBtn.disabled = false;
+                finishBtn.className = 'btn btn-success';
+                finishBtn.innerText = '🔄 次の受験者へ交代（スプレッドシート未設定）';
+                return;
+            }
+
+            finishBtn.disabled = true;
+            finishBtn.innerText = '💾 スプレッドシートに送信中...';
+
+            const payload = {
+                timestamp: new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }),
+                name: candidateName,
+                date: new Date().toLocaleDateString('ja-JP'),
+                score: score,
+                correct_count: correctCount,
+                pass_status: statusStr,
+                answers: userAnswers
+            };
+
+            fetch(gasUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                finishBtn.disabled = false;
+                finishBtn.className = 'btn btn-success';
+                finishBtn.innerText = '🔄 次の受験者へ交代';
+            })
+            .catch(err => {
+                console.error(err);
+                alert('⚠️ 送信中に一時的なエラーが発生しました。インターネット接続を確認してください。');
+                finishBtn.disabled = false;
+                finishBtn.className = 'btn btn-success';
+                finishBtn.innerText = '🔄 次の受験者へ交代（未送信）';
+            });
+        }
+
+        document.getElementById('finish-btn').addEventListener('click', () => {
+            document.getElementById('result-screen').style.display = 'none';
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('username').value = '';
+            checkUrlStatus();
+        });
+    </script>
+</body>
+</html>

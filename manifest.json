@@ -1,0 +1,22 @@
+{
+  "name": "めっき検査員 技能認定テスト",
+  "short_name": "めっきテスト",
+  "description": "めっき検査員の基礎知識および実務理解度を確認するための技能認定テストアプリ",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background-color": "#f0f2f5",
+  "theme-color": "#1e3a8a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://img.icons8.com/color/192/000000/microscope.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://img.icons8.com/color/512/000000/microscope.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}
