@@ -4,16 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>めっき検査員 技能認定テスト</title>
-
-    <meta name="theme-color" content="#1e3a8a">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="めっきテスト">
+    <!-- PWA用のマニフェストファイルを指定 -->
     <link rel="manifest" href="manifest.json">
-
-    <link rel="icon" type="image/png" sizes="192x192" href="https://img.icons8.com/color/192/000000/microscope.png">
-    <link rel="apple-touch-icon" href="https://img.icons8.com/color/192/000000/microscope.png">
-
+    <meta name="theme-color" content="#1e3a8a">
     <style>
         :root {
             --primary: #1e3a8a;
@@ -26,7 +19,7 @@
             --gray: #f3f4f6;
             --border: #e5e7eb;
         }
-
+        
         * {
             box-sizing: border-box;
             margin: 0;
@@ -55,6 +48,24 @@
             position: sticky;
             top: 0;
             z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: 24px; /* 設定ボタン分中央に寄せるための調整 */
+        }
+
+        .settings-icon {
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .container {
@@ -97,7 +108,7 @@
             font-size: 0.9rem;
         }
 
-        input[type="text"], input[type="url"] {
+        input[type="text"] {
             width: 100%;
             padding: 12px;
             border: 2px solid var(--border);
@@ -107,7 +118,7 @@
             transition: border-color 0.2s;
         }
 
-        input[type="text"]:focus, input[type="url"]:focus {
+        input[type="text"]:focus {
             border-color: var(--primary);
         }
 
@@ -130,14 +141,17 @@
             transform: scale(0.98);
         }
 
-        .btn:disabled {
-            background-color: #9ca3af;
-            cursor: not-allowed;
-        }
-
         .btn-success { background-color: var(--success); }
         .btn-secondary { background-color: #6b7280; }
+        .btn-danger { background-color: var(--danger); }
 
+        .btn:disabled {
+            background-color: #9ca3af !important;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* プログレスバー */
         .progress-container {
             margin-bottom: 15px;
         }
@@ -161,6 +175,7 @@
             transition: width 0.3s ease;
         }
 
+        /* 設問用スタイル */
         .category-badge {
             display: inline-block;
             background-color: var(--primary-light);
@@ -196,6 +211,7 @@
             text-align: left;
             cursor: pointer;
             transition: all 0.2s ease;
+            width: 100%;
         }
 
         .option-btn:active {
@@ -248,8 +264,9 @@
             color: white;
         }
 
+        /* 判定・解説 */
         .feedback {
-            margin-top: 20px;
+            margin-top: 15px;
             padding: 15px;
             border-radius: 12px;
             display: none;
@@ -281,17 +298,18 @@
         }
 
         .nav-actions {
-            margin-top: 20px;
+            margin-top: 15px;
             display: none;
         }
 
+        /* 結果画面 */
         .result-screen {
             text-align: center;
             display: none;
         }
 
         .result-score {
-            font-size: 3.5rem;
+            font-size: 3rem;
             font-weight: 900;
             color: var(--primary);
             margin: 15px 0;
@@ -310,43 +328,127 @@
         .judge-badge.pass { background-color: var(--success); }
         .judge-badge.fail { background-color: var(--danger); }
 
-        .settings-btn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-            z-index: 15;
+        /* 設定画面モーダル */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
 
-        .settings-screen {
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            animation: fadeIn 0.2s ease;
+        }
+
+        /* 管理者用画面 */
+        .admin-link {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 0.85rem;
+            color: #3b82f6;
+            cursor: pointer;
+            font-weight: bold;
+            padding: 8px;
+        }
+
+        .admin-screen {
             display: none;
         }
 
+        .admin-table-container {
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--gray);
+            font-weight: bold;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: white;
+        }
+        .badge.pass { background-color: var(--success); }
+        .badge.fail { background-color: var(--danger); }
+
+        .btn-text-only {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.8rem;
+            padding: 4px;
+        }
+
+        .btn-delete-only {
+            background: none;
+            border: none;
+            color: var(--danger);
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.8rem;
+            padding: 4px;
+        }
+
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(5px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .hidden { display: none !important; }
         .text-center { text-align: center; }
-        .mt-4 { margin-top: 20px; }
-        .small-text { font-size: 0.8rem; color: #6b7280; line-height: 1.4; }
+        .mt-4 { margin-top: 15px; }
+        .hidden { display: none !important; }
+        .sync-status {
+            font-size: 0.8rem;
+            text-align: center;
+            margin-top: 8px;
+            font-weight: bold;
+        }
+        .sync-status.ok { color: var(--success); }
+        .sync-status.warn { color: #f59e0b; }
     </style>
 </head>
 <body>
 
     <header>
-        めっき検査員 技能認定テスト
-        <button class="settings-btn" id="settings-toggle-btn">⚙️</button>
+        <div class="header-title">めっき検査員 技能認定テスト</div>
+        <div class="settings-icon" onclick="openSettings()">⚙️</div>
     </header>
 
     <div class="container">
-
-        <!-- 1. 受験者ログイン画面 -->
+        
+        <!-- 1. ログイン画面 -->
         <div id="login-screen" class="card">
             <h2>🎯 受験者登録</h2>
             <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 20px;">
@@ -356,10 +458,9 @@
                 <label for="username">氏名</label>
                 <input type="text" id="username" placeholder="例：鈴木 太郎" autocomplete="off">
             </div>
-
             <button class="btn" id="start-btn">テストを開始する</button>
-
-            <div class="mt-4 text-center" id="url-status-box"></div>
+            <div id="sync-indicator" class="sync-status"></div>
+            <div class="admin-link" onclick="showAdminScreen()">📊 管理者メニューはこちら</div>
         </div>
 
         <!-- 2. 試験中画面 -->
@@ -377,9 +478,12 @@
             <div class="card" style="margin-bottom: 10px;">
                 <span class="category-badge" id="category-name">使われ方・機能</span>
                 <div class="question-text" id="question-content">問題文がここに表示されます。</div>
-                <div class="option-list" id="options-container"></div>
+                <div class="option-list" id="options-container">
+                    <!-- JavaScriptで選択肢ボタンを動的生成 -->
+                </div>
             </div>
 
+            <!-- フィードバック（正誤と解説） -->
             <div class="feedback" id="feedback-box">
                 <div class="feedback-title" id="feedback-title-text"></div>
                 <div class="explanation" id="explanation-text"></div>
@@ -396,30 +500,59 @@
             <p id="candidate-name-display" style="font-weight: bold; margin-top: 10px;"></p>
             <div class="result-score" id="score-display">0点</div>
             <div class="judge-badge" id="judge-display">判定</div>
-            <p style="font-size: 0.9rem; color: #4b5563; margin-bottom: 25px;" id="result-message"></p>
-
+            <p style="font-size: 0.9rem; color: #4b5563; margin-bottom: 20px;" id="result-message"></p>
             <button class="btn btn-success" id="finish-btn">🔄 次の受験者へ交代</button>
         </div>
 
-        <!-- 4. 管理者設定画面 -->
-        <div id="settings-screen" class="card settings-screen">
-            <h2>⚙️ システム管理者設定</h2>
-            <p class="small-text" style="margin-bottom: 15px;">
-                送信先のGoogleスプレッドシート（GASウェブアプリ）のURLを登録してください。データは直接スプレッドシートへ安全に送信されます。
-            </p>
-            <div class="input-group">
-                <label for="gas-url">GASウェブアプリ URL</label>
-                <input type="url" id="gas-url" placeholder="https://script.google.com/macros/s/.../exec">
+        <!-- 4. 管理者画面 -->
+        <div id="admin-screen" class="card admin-screen">
+            <h2>📊 受験結果データベース</h2>
+            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 10px;">スマホ内に保存されている過去の受験履歴です。</p>
+            
+            <div style="margin-top: 10px; display: flex; gap: 8px; margin-bottom: 15px;">
+                <button class="btn btn-success" onclick="downloadCSV()" style="padding: 10px; font-size: 0.85rem; flex: 1;">📥 CSV (Excel対応) 出力</button>
+                <button class="btn btn-secondary" onclick="hideAdminScreen()" style="padding: 10px; font-size: 0.85rem; flex: 1;">戻る</button>
             </div>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn btn-secondary" id="settings-back-btn" style="flex: 1;">戻る</button>
-                <button class="btn" id="settings-save-btn" style="flex: 1;">保存する</button>
+
+            <div class="admin-table-container">
+                <table id="results-table">
+                    <thead>
+                        <tr>
+                            <th>氏名</th>
+                            <th>得点</th>
+                            <th>判定</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="results-tbody">
+                        <!-- データがここに挿入されます -->
+                    </tbody>
+                </table>
             </div>
         </div>
 
     </div>
 
+    <!-- 設定画面モーダル -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <h2>⚙️ システム設定</h2>
+            <p style="font-size: 0.8rem; color: #6b7280; margin-bottom: 15px;">
+                Googleスプレッドシートへの保存用URL（GASデプロイURL）を設定します。
+            </p>
+            <div class="input-group">
+                <label for="gas-url-input">Google Apps Script(GAS) ウェブアプリURL</label>
+                <input type="text" id="gas-url-input" placeholder="https://script.google.com/macros/s/.../exec">
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn btn-success" onclick="saveSettings()" style="padding: 10px; font-size: 0.9rem; flex: 1;">保存する</button>
+                <button class="btn btn-secondary" onclick="closeSettings()" style="padding: 10px; font-size: 0.9rem; flex: 1;">閉じる</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // 全20問の質問データ
         const QUESTIONS = [
             {
                 "id": 1,
@@ -427,7 +560,7 @@
                 "question": "コネクタ用端子への「スズ（Sn）めっき」の主な目的はどれですか？",
                 "options": {"A": "見た目を良くする", "B": "耐食性向上・電気接続確保", "C": "硬度を上げ曲げ防止", "D": "製品の重量を増す"},
                 "answer": "B",
-                "explanation": "コネクタ用端子にスズめっきを施す主な目的は、錆びを防ぐ「耐食性向上」と、電気を安定して通すための「電気接続確保」です。"
+                "explanation": "コネクタ用端子にスズめっきを施する主な目的は、錆びを防ぐ「耐食性向上」と、電気を安定して通すための「電気接続確保」です。"
             },
             {
                 "id": 2,
@@ -519,7 +652,7 @@
             },
             {
                 "id": 13,
-                "category": "環境負荷物質 of 知識",
+                "category": "環境負荷物質の知識",
                 "question": "RoHS（ローハス）指令で規制されている代表的な有害物質はどれですか？",
                 "options": {"A": "金・銀・銅", "B": "鉛・水銀・カドミウム等", "C": "鉄・アルミニウム", "D": "酸素・窒素"},
                 "answer": "B",
@@ -584,67 +717,64 @@
         ];
 
         let currentQuestionIdx = 0;
-        let score = 0;
         let correctCount = 0;
         let candidateName = "";
         let selectedOption = null;
         let isAnswered = false;
-        let userAnswers = {};
+        let examDate = "";
+        let userAnswers = {}; // 各設問の正誤ログ保存用
 
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('service-worker.js');
-            });
-        }
+        // ロード時の初期化
+        window.onload = function() {
+            loadGasUrl();
+            updateSyncIndicator();
+            
+            // 本日の日付を自動取得 (YYYY-MM-DD)
+            const today = new Date();
+            const y = today.getFullYear();
+            const m = String(today.getMonth() + 1).padStart(2, '0');
+            const d = String(today.getDate()).padStart(2, '0');
+            examDate = `${y}-${m}-${d}`;
+        };
 
-        window.addEventListener('DOMContentLoaded', () => {
-            loadGASUrl();
-            checkUrlStatus();
-        });
-
-        function saveGASUrl(url) {
-            localStorage.setItem('plating_test_gas_url', url.trim());
-        }
-
-        function loadGASUrl() {
-            const url = localStorage.getItem('plating_test_gas_url') || "";
-            document.getElementById('gas-url').value = url;
+        // GAS URL の読み書き
+        function loadGasUrl() {
+            const url = localStorage.getItem('gas_web_app_url') || "";
+            document.getElementById('gas-url-input').value = url;
             return url;
         }
 
-        function checkUrlStatus() {
-            const url = localStorage.getItem('plating_test_gas_url');
-            const box = document.getElementById('url-status-box');
-            if (url && url.startsWith('http')) {
-                box.innerHTML = '<span style="color: var(--success); font-weight: bold; font-size: 0.85rem;">🟢 Googleスプレッドシート連携 完了</span>';
+        function updateSyncIndicator() {
+            const url = localStorage.getItem('gas_web_app_url');
+            const indicator = document.getElementById('sync-indicator');
+            if (url) {
+                indicator.className = "sync-status ok";
+                indicator.innerText = "🟢 Googleスプレッドシート連携 完了";
             } else {
-                box.innerHTML = '<span style="color: var(--danger); font-weight: bold; font-size: 0.85rem;">⚠️ 警告: スプレッドシート連携が未設定です。<br>右上 ⚙️ アイコンからGASのURLを設定してください。</span>';
+                indicator.className = "sync-status warn";
+                indicator.innerText = "⚠️ スプレッドシート未連携 (スマホにのみ保存されます)";
             }
         }
 
-        document.getElementById('settings-toggle-btn').addEventListener('click', () => {
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('quiz-screen').classList.add('hidden');
-            document.getElementById('result-screen').style.display = 'none';
-            document.getElementById('settings-screen').style.display = 'block';
-        });
+        // 設定画面を開閉
+        function openSettings() {
+            document.getElementById('settings-modal').style.display = 'flex';
+        }
 
-        document.getElementById('settings-back-btn').addEventListener('click', () => {
-            document.getElementById('settings-screen').style.display = 'none';
-            document.getElementById('login-screen').classList.remove('hidden');
-            checkUrlStatus();
-        });
+        function closeSettings() {
+            document.getElementById('settings-modal').style.display = 'none';
+        }
 
-        document.getElementById('settings-save-btn').addEventListener('click', () => {
-            const url = document.getElementById('gas-url').value;
-            saveGASUrl(url);
-            alert('送信先のGAS URLを保存しました！');
-            document.getElementById('settings-screen').style.display = 'none';
-            document.getElementById('login-screen').classList.remove('hidden');
-            checkUrlStatus();
-        });
+        function saveSettings() {
+            const url = document.getElementById('gas-url-input').value.trim();
+            localStorage.setItem('gas_web_app_url', url);
+            updateSyncIndicator();
+            closeSettings();
+            alert('設定を保存しました。');
+        }
 
-        document.getElementById('start-btn').addEventListener('click', () => {
+        // テスト開始ボタン
+        document.getElementById('start-btn').addEventListener('click', function() {
             const nameInput = document.getElementById('username').value.trim();
             if (!nameInput) {
                 alert('受験者の氏名を入力してください。');
@@ -652,17 +782,17 @@
             }
             candidateName = nameInput;
             currentQuestionIdx = 0;
-            score = 0;
             correctCount = 0;
             isAnswered = false;
             userAnswers = {};
-
+            
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('quiz-screen').classList.remove('hidden');
-
+            
             loadQuestion();
         });
 
+        // 設問読み込み
         function loadQuestion() {
             isAnswered = false;
             selectedOption = null;
@@ -670,21 +800,24 @@
             document.getElementById('nav-box').style.display = 'none';
 
             const q = QUESTIONS[currentQuestionIdx];
-
+            
+            // 進捗更新
             const currentNum = currentQuestionIdx + 1;
             const totalNum = QUESTIONS.length;
             const percent = Math.round((currentQuestionIdx / totalNum) * 100);
-
+            
             document.getElementById('progress-question-num').innerText = `問 ${currentNum} / ${totalNum}`;
             document.getElementById('progress-percent').innerText = `${percent}%`;
             document.getElementById('progress-bar-inner').style.width = `${percent}%`;
 
+            // 問題セット
             document.getElementById('category-name').innerText = q.category;
             document.getElementById('question-content').innerText = `問${currentNum}. ${q.question}`;
 
+            // 選択肢生成
             const container = document.getElementById('options-container');
             container.innerHTML = '';
-
+            
             for (let key in q.options) {
                 const val = q.options[key];
                 const btn = document.createElement('button');
@@ -695,18 +828,22 @@
             }
         }
 
+        // 選択肢タップ時
         function selectOption(key, btnElement) {
             if (isAnswered) return;
 
+            // 選択済みのスタイル解除
             const buttons = document.querySelectorAll('.option-btn');
             buttons.forEach(b => b.classList.remove('selected'));
 
             selectedOption = key;
             btnElement.classList.add('selected');
 
+            // 自動で解答判定に進む（タップ一発で決定！）
             judgeAnswer();
         }
 
+        // 判定・解説表示
         function judgeAnswer() {
             if (isAnswered) return;
             isAnswered = true;
@@ -715,6 +852,14 @@
             const buttons = document.querySelectorAll('.option-btn');
             const isCorrect = (selectedOption === q.answer);
 
+            // 正解・不正解の記録
+            if (isCorrect) {
+                userAnswers["問" + q.id] = "◯";
+            } else {
+                userAnswers["問" + q.id] = `✕ (${selectedOption || '未解答'})`;
+            }
+
+            // 正解・不正解ボタンに色付け
             buttons.forEach(btn => {
                 const key = btn.querySelector('.option-badge').innerText;
                 if (key === q.answer) {
@@ -724,8 +869,7 @@
                 }
             });
 
-            userAnswers[`問${q.id}`] = isCorrect ? '◯' : `✕ (${selectedOption})`;
-
+            // フィードバック表示
             const feedbackBox = document.getElementById('feedback-box');
             const feedbackTitle = document.getElementById('feedback-title-text');
             const explanationText = document.getElementById('explanation-text');
@@ -738,17 +882,19 @@
                 feedbackBox.className = 'feedback incorrect';
                 feedbackTitle.innerHTML = `❌ <b>不正解...</b> (正解は [${q.answer}] です)`;
             }
-
+            
             explanationText.innerText = q.explanation;
             feedbackBox.style.display = 'block';
             document.getElementById('nav-box').style.display = 'block';
 
+            // スクロールして解説を見やすくする
             setTimeout(() => {
                 feedbackBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }, 100);
         }
 
-        document.getElementById('next-btn').addEventListener('click', () => {
+        // 「次の問題へ」ボタン
+        document.getElementById('next-btn').addEventListener('click', function() {
             currentQuestionIdx++;
             if (currentQuestionIdx < QUESTIONS.length) {
                 loadQuestion();
@@ -757,20 +903,21 @@
             }
         });
 
+        // 結果発表
         function showResult() {
             document.getElementById('quiz-screen').classList.add('hidden');
             document.getElementById('result-screen').style.display = 'block';
 
-            score = correctCount * 5;
+            const score = correctCount * 5;
             const isPass = (score >= 80);
             const statusStr = isPass ? '合格' : '要再試験';
 
             document.getElementById('candidate-name-display').innerText = `${candidateName} さん`;
             document.getElementById('score-display').innerText = `${score} 点`;
-
+            
             const judgeDisplay = document.getElementById('judge-display');
             const msgDisplay = document.getElementById('result-message');
-
+            
             if (isPass) {
                 judgeDisplay.innerText = '🎉 合 格';
                 judgeDisplay.className = 'judge-badge pass';
@@ -781,61 +928,185 @@
                 msgDisplay.innerText = '合格ラインは80点です。解説を読み返し、再度挑戦しましょう。';
             }
 
-            sendToGoogleSheets(statusStr);
-        }
-
-        function sendToGoogleSheets(statusStr) {
-            const gasUrl = localStorage.getItem('plating_test_gas_url');
-            const finishBtn = document.getElementById('finish-btn');
-
-            if (!gasUrl || !gasUrl.startsWith('http')) {
-                finishBtn.disabled = false;
-                finishBtn.className = 'btn btn-success';
-                finishBtn.innerText = '🔄 次の受験者へ交代（スプレッドシート未設定）';
-                return;
-            }
-
-            finishBtn.disabled = true;
-            finishBtn.innerText = '💾 スプレッドシートに送信中...';
-
-            const payload = {
-                timestamp: new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }),
+            // 新しく保存するデータの組み立て
+            const now = new Date();
+            const timestampStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+            
+            const resultData = {
+                id: Date.now(), // 簡易ユニークID
+                timestamp: timestampStr,
                 name: candidateName,
-                date: new Date().toLocaleDateString('ja-JP'),
+                date: examDate,
                 score: score,
                 correct_count: correctCount,
+                total_count: QUESTIONS.length,
                 pass_status: statusStr,
                 answers: userAnswers
             };
 
-            fetch(gasUrl, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            })
-            .then(() => {
+            // 1. スマホのローカルストレージに確実に即時保存！
+            saveToLocalStorage(resultData);
+
+            // 2. Googleスプレッドシート（GAS）に送信
+            const gasUrl = localStorage.getItem('gas_web_app_url');
+            const finishBtn = document.getElementById('finish-btn');
+            
+            if (gasUrl) {
+                finishBtn.disabled = true;
+                finishBtn.innerText = '💾 スプレッドシートに送信中...';
+
+                // CORSエラーを避けるため、no-corsモードでPOSTします
+                fetch(gasUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(resultData)
+                })
+                .then(() => {
+                    // 送信完了時のボタン復元
+                    finishBtn.disabled = false;
+                    finishBtn.innerText = '🔄 次の受験者へ交代';
+                })
+                .catch(err => {
+                    alert('⚠️ スプレッドシートへの通信に失敗しました。データはスマホ内に安全に保存されていますので、そのまま交代して大丈夫です。');
+                    finishBtn.disabled = false;
+                    finishBtn.innerText = '🔄 次の受験者へ交代';
+                });
+            } else {
+                // スプレッドシート未設定の場合は即交代可能
                 finishBtn.disabled = false;
-                finishBtn.className = 'btn btn-success';
                 finishBtn.innerText = '🔄 次の受験者へ交代';
-            })
-            .catch(err => {
-                console.error(err);
-                alert('⚠️ 送信中に一時的なエラーが発生しました。インターネット接続を確認してください。');
-                finishBtn.disabled = false;
-                finishBtn.className = 'btn btn-success';
-                finishBtn.innerText = '🔄 次の受験者へ交代（未送信）';
-            });
+            }
         }
 
-        document.getElementById('finish-btn').addEventListener('click', () => {
+        // ローカルストレージへの保存処理
+        function saveToLocalStorage(data) {
+            let results = [];
+            try {
+                results = JSON.parse(localStorage.getItem('quiz_results_v3')) || [];
+            } catch (e) {
+                results = [];
+            }
+            results.unshift(data); // 新しいデータを先頭に追加
+            localStorage.setItem('quiz_results_v3', JSON.stringify(results));
+        }
+
+        // 「次の人に交代」ボタン
+        document.getElementById('finish-btn').addEventListener('click', function() {
             document.getElementById('result-screen').style.display = 'none';
             document.getElementById('login-screen').classList.remove('hidden');
             document.getElementById('username').value = '';
-            checkUrlStatus();
         });
+
+        // 管理者画面表示
+        function showAdminScreen() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('admin-screen').style.display = 'block';
+            loadAdminData();
+        }
+
+        function hideAdminScreen() {
+            document.getElementById('admin-screen').style.display = 'none';
+            document.getElementById('login-screen').classList.remove('hidden');
+        }
+
+        // ローカルデータを読み込んでテーブル表示
+        function loadAdminData() {
+            let data = [];
+            try {
+                data = JSON.parse(localStorage.getItem('quiz_results_v3')) || [];
+            } catch (e) {
+                data = [];
+            }
+
+            const tbody = document.getElementById('results-tbody');
+            tbody.innerHTML = '';
+            
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center" style="color: #9ca3af; padding: 20px;">スマホ内に保存されたデータはありません</td></tr>';
+                return;
+            }
+
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                const badgeClass = (row.pass_status === '合格') ? 'badge pass' : 'badge fail';
+                
+                // 問1〜問20の正誤データ文字列を作成
+                let detailStr = "";
+                for(let i=1; i<=20; i++) {
+                    detailStr += `問${i}: ${row.answers["問"+i] || '未解答'}\n`;
+                }
+
+                tr.innerHTML = `
+                    <td><b>${row.name}</b><br><span style="font-size:0.75rem; color:#6b7280;">${row.timestamp.split(' ')[0]}</span></td>
+                    <td>${row.score}点</td>
+                    <td><span class="${badgeClass}">${row.pass_status}</span></td>
+                    <td style="white-space: nowrap;">
+                        <button class="btn-text-only" onclick="showRowDetail('${row.name}', \`${detailStr}\`)">📄 詳細</button>
+                        <button class="btn-delete-only" onclick="deleteLocalResult(${row.id})">❌ 削除</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 個別結果のポップアップ表示
+        function showRowDetail(name, detailText) {
+            alert(`【${name} 様 の詳細正誤データ】\n\n${detailText}`);
+        }
+
+        // ローカルデータの削除
+        function deleteLocalResult(id) {
+            if (confirm('この受験結果をスマホ内から完全に削除してもよろしいですか？')) {
+                let data = JSON.parse(localStorage.getItem('quiz_results_v3')) || [];
+                data = data.filter(item => item.id !== id);
+                localStorage.setItem('quiz_results_v3', JSON.stringify(data));
+                loadAdminData();
+            }
+        }
+
+        // CSVダウンロード処理 (BOM付きUTF-8)
+        function downloadCSV() {
+            let data = [];
+            try {
+                data = JSON.parse(localStorage.getItem('quiz_results_v3')) || [];
+            } catch (e) {
+                data = [];
+            }
+
+            if (data.length === 0) {
+                alert('出力するデータがありません。');
+                return;
+            }
+
+            // Excelで開いても文字化けしないようにBOMを追加
+            let csvContent = "\ufeff受験日時,氏名,得点,正解数,総設問数,判定";
+            
+            // CSVヘッダーに問1〜問20を追加
+            for(let i=1; i<=20; i++) {
+                csvContent += `,問${i}`;
+            }
+            csvContent += "\n";
+
+            // 行データ作成
+            data.forEach(row => {
+                let line = `"${row.timestamp}","${row.name}",${row.score},${row.correct_count},${row.total_count},"${row.pass_status}"`;
+                for(let i=1; i<=20; i++) {
+                    line += `,"${row.answers["問"+i] || ''}"`;
+                }
+                csvContent += line + "\n";
+            });
+
+            // ファイルとしてダウンロード
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", "plating_test_results.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
     </script>
 </body>
 </html>
