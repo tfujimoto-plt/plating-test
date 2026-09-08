@@ -351,6 +351,54 @@
         .text-center { text-align: center; }
         .mt-4 { margin-top: 15px; }
         .hidden { display: none !important; }
+
+        /* 問題編集画面用の追加スタイル */
+        .editor-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        @media (max-width: 480px) {
+            .editor-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .textarea-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            resize: vertical;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .textarea-input:focus {
+            border-color: var(--primary);
+        }
+        select.select-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: white;
+            outline: none;
+        }
+        select.select-input:focus {
+            border-color: var(--primary);
+        }
+        .btn-warning {
+            background-color: #f59e0b !important;
+        }
+        .btn-danger {
+            background-color: #ef4444 !important;
+        }
+        .btn-info {
+            background-color: #3b82f6 !important;
+        }
     </style>
 </head>
 <body>
@@ -422,9 +470,12 @@
                 過去の受験履歴がこのブラウザ内に直接安全に保存されています。
             </p>
             
-            <div style="margin-top: 10px; display: flex; gap: 8px;">
-                <button class="btn btn-success" onclick="downloadCSV()" style="padding: 10px; font-size: 0.85rem; flex: 1;">📥 Excel用CSVを出力</button>
-                <button class="btn btn-secondary" onclick="hideAdminScreen()" style="padding: 10px; font-size: 0.85rem; flex: 1;">戻る</button>
+            <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; gap: 8px; width: 100%;">
+                    <button class="btn btn-success" onclick="downloadCSV()" style="padding: 10px; font-size: 0.85rem; flex: 1;">📥 Excel用CSVを出力</button>
+                    <button class="btn btn-secondary" onclick="showEditorScreen()" style="padding: 10px; font-size: 0.85rem; flex: 1; background-color: #2563eb;">📝 テスト問題の編集</button>
+                </div>
+                <button class="btn btn-secondary" onclick="hideAdminScreen()" style="padding: 10px; font-size: 0.85rem; width: 100%;">戻る</button>
             </div>
 
             <div class="admin-table-container">
@@ -445,11 +496,80 @@
             </div>
         </div>
 
+        <!-- 5. 問題編集画面 -->
+        <div id="editor-screen" class="card hidden">
+            <h2>📝 テスト問題の編集・カスタマイズ</h2>
+            <p style="font-size: 0.82rem; color: #6b7280; margin-bottom: 15px; line-height: 1.4;">
+                画面上で問題文や選択肢を直接編集し、更新されたアプリファイル（index.html）を直接ダウンロードできます。
+            </p>
+
+            <div class="input-group">
+                <label for="edit-question-select"><b>編集する設問番号：</b></label>
+                <select id="edit-question-select" class="select-input" onchange="loadQuestionToEditor()">
+                    <!-- JSで動的に20問生成 -->
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="edit-category"><b>分野（カテゴリー）：</b></label>
+                <input type="text" id="edit-category" placeholder="例：使われ方・機能">
+            </div>
+
+            <div class="input-group">
+                <label for="edit-question-text"><b>問題文：</b></label>
+                <textarea id="edit-question-text" class="textarea-input" rows="3"></textarea>
+            </div>
+
+            <div class="editor-grid">
+                <div>
+                    <label for="edit-opt-a"><b>選択肢 A：</b></label>
+                    <input type="text" id="edit-opt-a">
+                </div>
+                <div>
+                    <label for="edit-opt-b"><b>選択肢 B：</b></label>
+                    <input type="text" id="edit-opt-b">
+                </div>
+                <div>
+                    <label for="edit-opt-c"><b>選択肢 C：</b></label>
+                    <input type="text" id="edit-opt-c">
+                </div>
+                <div>
+                    <label for="edit-opt-d"><b>選択肢 D：</b></label>
+                    <input type="text" id="edit-opt-d">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="edit-answer"><b>正しい答え（正解）：</b></label>
+                <select id="edit-answer" class="select-input">
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="edit-explanation"><b>解説文：</b></label>
+                <textarea id="edit-explanation" class="textarea-input" rows="3"></textarea>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-warning" onclick="saveCurrentQuestionEdits(false)">💾 変更をこのスマホに一時保存</button>
+                <button class="btn" onclick="downloadUpdatedAppHTML()" style="background-color: #10b981;">📥 この内容で「index.html」を書き出し</button>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-secondary btn-danger" onclick="resetQuestionsToDefault()" style="flex: 1; padding: 12px; font-size: 0.85rem;">⚠️ 初期問題に戻す</button>
+                    <button class="btn btn-secondary" onclick="hideEditorScreen()" style="flex: 1; padding: 12px; font-size: 0.85rem;">戻る</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
         // 1一言一句、認定テストの質問定義
-        const questions = [
+        /*START_QUESTIONS*/
+        const defaultQuestions = [
             {
                 "id": 1,
                 "category": "使われ方・機能",
@@ -611,6 +731,23 @@
                 "explanation": "異常が発生した場合は、速やかに該当ロット製品を保留（隔離）し、関係部署（製造、技術、品管など）に連絡してプロセス異常の原因究明を行うことが求められます。"
             }
         ];
+        /*END_QUESTIONS*/
+
+        // ローカルストレージにカスタム問題があればそちらを読み込み、なければデフォルトを読み込む
+        let questions = [];
+        try {
+            const stored = localStorage.getItem("custom_plating_questions");
+            if (stored) {
+                questions = JSON.parse(stored);
+                if (!Array.isArray(questions) || questions.length !== 20) {
+                    questions = JSON.parse(JSON.stringify(defaultQuestions));
+                }
+            } else {
+                questions = JSON.parse(JSON.stringify(defaultQuestions));
+            }
+        } catch(e) {
+            questions = JSON.parse(JSON.stringify(defaultQuestions));
+        }
 
         let currentQuestionIdx = 0;
         let score = 0;
@@ -881,6 +1018,145 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+        }
+
+        // --- 問題編集（管理者用）のJS機能 ---
+        function showEditorScreen() {
+            document.getElementById('admin-screen').classList.add('hidden');
+            document.getElementById('editor-screen').classList.remove('hidden');
+            
+            // 選択肢セレクトボックスの生成
+            const select = document.getElementById('edit-question-select');
+            select.innerHTML = '';
+            questions.forEach((q, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.innerText = `問${q.id} [${q.category}]`;
+                select.appendChild(opt);
+            });
+            
+            loadQuestionToEditor();
+        }
+
+        function hideEditorScreen() {
+            document.getElementById('editor-screen').classList.add('hidden');
+            document.getElementById('admin-screen').classList.remove('hidden');
+        }
+
+        function loadQuestionToEditor() {
+            const select = document.getElementById('edit-question-select');
+            const idx = parseInt(select.value);
+            const q = questions[idx];
+            
+            document.getElementById('edit-category').value = q.category || '';
+            document.getElementById('edit-question-text').value = q.question || '';
+            document.getElementById('edit-opt-a').value = q.options.A || '';
+            document.getElementById('edit-opt-b').value = q.options.B || '';
+            document.getElementById('edit-opt-c').value = q.options.C || '';
+            document.getElementById('edit-opt-d').value = q.options.D || '';
+            document.getElementById('edit-answer').value = q.answer || 'A';
+            document.getElementById('edit-explanation').value = q.explanation || '';
+        }
+
+        function saveCurrentQuestionEdits(silent = false) {
+            const select = document.getElementById('edit-question-select');
+            const idx = parseInt(select.value);
+            const idVal = questions[idx].id;
+            
+            const category = document.getElementById('edit-category').value.trim();
+            const questionText = document.getElementById('edit-question-text').value.trim();
+            const optA = document.getElementById('edit-opt-a').value.trim();
+            const optB = document.getElementById('edit-opt-b').value.trim();
+            const optC = document.getElementById('edit-opt-c').value.trim();
+            const optD = document.getElementById('edit-opt-d').value.trim();
+            const answer = document.getElementById('edit-answer').value;
+            const explanation = document.getElementById('edit-explanation').value.trim();
+            
+            if (!category || !questionText || !optA || !optB || !optC || !optD || !explanation) {
+                if (!silent) alert('空欄の項目があります。すべての入力項目を埋めてください。');
+                return false;
+            }
+            
+            // 更新
+            questions[idx] = {
+                id: idVal,
+                category: category,
+                question: questionText,
+                options: {
+                    A: optA,
+                    B: optB,
+                    C: optC,
+                    D: optD
+                },
+                answer: answer,
+                explanation: explanation
+            };
+            
+            localStorage.setItem("custom_plating_questions", JSON.stringify(questions));
+            if (!silent) {
+                alert(`問${idVal} の変更をこのスマホに一時保存しました！\n現在開いているこの画面ですぐに新しいテストを試すことができます。`);
+            }
+            return true;
+        }
+
+        function resetQuestionsToDefault() {
+            if (confirm('本当にすべての問題の編集内容をリセットし、初期問題（めっき検査員20問）に戻しますか？')) {
+                localStorage.removeItem("custom_plating_questions");
+                alert('初期状態にリセットしました。画面を再読み込みします。');
+                location.reload();
+            }
+        }
+
+        function downloadUpdatedAppHTML() {
+            // 現在開いている編集中の設問変更をまずは自動で強制保存
+            const isSaved = saveCurrentQuestionEdits(true);
+            if (!isSaved) {
+                alert('入力エラーがあるため、ファイルを書き出せませんでした。各項目を正しく埋めてください。');
+                return;
+            }
+
+            fetch(window.location.href)
+                .then(res => {
+                    if (!res.ok) throw new Error('Fetch HTML failed');
+                    return res.text();
+                })
+                .then(html => {
+                    // JSON化して埋め込みソースコードを成形
+                    const newQuestionsJSON = JSON.stringify(questions, null, 12);
+                    const formattedQuestionsCode = `const defaultQuestions = ${newQuestionsJSON};`;
+                    
+                    // /*START_QUESTIONS*/ と /*END_QUESTIONS*/ の間を置換する
+                    const startMarker = '/*START_QUESTIONS*/';
+                    const endMarker = '/*END_QUESTIONS*/';
+                    
+                    const startIdx = html.indexOf(startMarker);
+                    const endIdx = html.indexOf(endMarker);
+                    
+                    let updatedHTML = '';
+                    if (startIdx !== -1 && endIdx !== -1) {
+                        updatedHTML = html.substring(0, startIdx + startMarker.length) + 
+                                      '\n        ' + formattedQuestionsCode + '\n        ' +
+                                      html.substring(endIdx);
+                    } else {
+                        alert('エラー：HTMLソース内の置換用マークが見つかりませんでした。');
+                        return;
+                    }
+                    
+                    // Blobを使ってブラウザから直接ダウンロード
+                    const blob = new Blob([updatedHTML], { type: 'text/html; charset=utf-8' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'index.html';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    alert('✨ 完璧です！おめでとうございます！\n\n新しい設問データが完全に埋め込まれた『index.html』をダウンロードしました。\n\nこのファイルをGitHubにドラッグ＆ドロップして上書き（Commit）するだけで、すべてのスマホのテスト問題が一瞬で自動アップデートされます！');
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('自動書き出しエラー: このブラウザのセキュリティ設定、またはオフライン環境のため、ファイルを直接ダウンロードできませんでした。パソコンのブラウザ、または安全な通信環境下でお試しください。');
+                });
         }
     </script>
 </body>
